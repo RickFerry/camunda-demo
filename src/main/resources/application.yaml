@@ -1,0 +1,28 @@
+spring:
+  application:
+    name: camunda-demo
+  datasource:
+    url: jdbc:h2:mem:camunda
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+
+server:
+  port: 8080
+
+camunda:
+  bpm:
+    admin-user:
+      id: demo
+      password: demo
+      firstName: Demo
+      lastName: User
+
+logging:
+  level:
+    org.camunda: INFO
+    com.exemplo: DEBUG
