@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/"
+             xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/"
+             xmlns:camunda="http://camunda.org/schema/1.0/dmn"
+             id="classificar-Idade" name="Classificar Idade"
+             namespace="http://camunda.org/schema/1.0/dmn">
+  <decision id="classificarIdade" name="Classificar Idade">
+    <decisionTable id="decisionTable" hitPolicy="UNIQUE">
+      <input id="input1" label="Idade">
+        <inputExpression id="inputExpression1" typeRef="double">
+          <text>idade</text>
+        </inputExpression>
+      </input>
+      <output id="output1" label="Classificação" name="classificacao" typeRef="string"/>
+      <rule id="rule1">
+        <inputEntry id="inputEntry1">
+          <text><![CDATA[< 13]]></text>
+        </inputEntry>
+        <outputEntry id="outputEntry1">
+          <text><![CDATA["Criança"]]></text>
+        </outputEntry>
+      </rule>
+      <rule id="rule2">
+        <inputEntry id="inputEntry2">
+          <text><![CDATA[[13..17]]]></text>
+        </inputEntry>
+        <outputEntry id="outputEntry2">
+          <text><![CDATA["Adolescente"]]></text>
+        </outputEntry>
+      </rule>
+      <rule id="rule3">
+        <inputEntry id="inputEntry3">
+          <text><![CDATA[[18..59]]]></text>
+        </inputEntry>
+        <outputEntry id="outputEntry3">
+          <text><![CDATA["Adulto"]]></text>
+        </outputEntry>
+      </rule>
+      <rule id="rule4">
+        <inputEntry id="inputEntry4">
+          <text><![CDATA[>= 60]]></text>
+        </inputEntry>
+        <outputEntry id="outputEntry4">
+          <text><![CDATA["Idoso"]]></text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

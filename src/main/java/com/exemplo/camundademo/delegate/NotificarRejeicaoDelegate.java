@@ -13,8 +13,7 @@ public class NotificarRejeicaoDelegate implements JavaDelegate {
     public void execute(DelegateExecution execution) {
         String nome = (String) execution.getVariable("nome");
         int score = (int) execution.getVariable("score");
-        boolean aprovado = execution.getVariable("aprovado") != null
-                ? (boolean) execution.getVariable("aprovado") : false;
+        boolean aprovado = execution.getVariable("aprovado") != null && (boolean) execution.getVariable("aprovado");
 
         StringBuilder motivo = new StringBuilder();
         if (score <= 700) {
