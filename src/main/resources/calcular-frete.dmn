@@ -1,78 +1,102 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
-             xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/"
-             xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/"
              xmlns:camunda="http://camunda.org/schema/1.0/dmn"
-             id="calcular-frete" name="Calcular Frete"
+             id="calcular-frete"
+             name="Calcular Frete"
              namespace="http://camunda.org/schema/1.0/dmn">
-  <decision id="calcularFrete" name="Calcular Frete">
-    <decisionTable id="decisionTable" hitPolicy="UNIQUE">
-      <input id="input1" label="Peso">
-        <inputExpression id="inputExpression1" typeRef="double">
+
+  <decision id="decisao-calcular-frete" name="Calcular Frete" camunda:historyTimeToLive="P30D">
+    <decisionTable id="decisao-calcular-frete_tab" hitPolicy="UNIQUE">
+      <input id="input_1" label="Peso (kg)">
+        <inputExpression id="inputExpr_1" typeRef="number">
           <text>peso</text>
         </inputExpression>
       </input>
-      <input id="input2" label="Destino">
-        <inputExpression id="inputExpression2" typeRef="string">
-          <text>destino</text>
+      <input id="input_2" label="Estado Origem">
+        <inputExpression id="inputExpr_2" typeRef="string">
+          <text>estadoOrigem</text>
         </inputExpression>
       </input>
-      <output id="output1" label="Valor Frete" name="valorFrete" typeRef="double"/>
-      <rule id="rule1">
-        <inputEntry id="inputEntry1">
-          <text><![CDATA[<= 5]]></text>
-        </inputEntry>
-        <inputEntry id="inputEntry2">
-          <text><![CDATA["SP"]]></text>
-        </inputEntry>
-        <outputEntry id="outputEntry1">
-          <text><![CDATA[10]]></text>
-        </outputEntry>
+      <input id="input_3" label="Estado Destino">
+        <inputExpression id="inputExpr_3" typeRef="string">
+          <text>estadoDestino</text>
+        </inputExpression>
+      </input>
+      <output id="output_1" label="Frete Total" name="freteTotal" typeRef="number"/>
+      <output id="output_2" label="Taxa Adicional" name="taxaAdicional" typeRef="string"/>
+      <rule id="rule_1">
+        <description>Peso ate 5kg, SP para RJ</description>
+        <inputEntry id="ie_1_1"><text>&lt;= 5</text></inputEntry>
+        <inputEntry id="ie_1_2"><text>"SP"</text></inputEntry>
+        <inputEntry id="ie_1_3"><text>"RJ"</text></inputEntry>
+        <outputEntry id="oe_1_1"><text>30.00</text></outputEntry>
+        <outputEntry id="oe_1_2"><text>"0%"</text></outputEntry>
       </rule>
-      <rule id="rule2">
-        <inputEntry id="inputEntry3">
-          <text><![CDATA[> 5]]></text>
-        </inputEntry>
-        <inputEntry id="inputEntry4">
-          <text><![CDATA["SP"]]></text>
-        </inputEntry>
-        <outputEntry id="outputEntry2">
-          <text><![CDATA[20]]></text>
-        </outputEntry>
+      <rule id="rule_2">
+        <description>Peso ate 5kg, SP para outros estados</description>
+        <inputEntry id="ie_2_1"><text>&lt;= 5</text></inputEntry>
+        <inputEntry id="ie_2_2"><text>"SP"</text></inputEntry>
+        <inputEntry id="ie_2_3"><text>not("RJ")</text></inputEntry>
+        <outputEntry id="oe_2_1"><text>30.00</text></outputEntry>
+        <outputEntry id="oe_2_2"><text>"10%"</text></outputEntry>
       </rule>
-      <rule id="rule3">
-        <inputEntry id="inputEntry5">
-          <text><![CDATA[<= 5]]></text>
-        </inputEntry>
-        <inputEntry id="inputEntry6">
-          <text><![CDATA["RJ"]]></text>
-        </inputEntry>
-        <outputEntry id="outputEntry3">
-          <text><![CDATA[15]]></text>
-        </outputEntry>
+      <rule id="rule_3">
+        <description>Peso ate 5kg, RJ para SP</description>
+        <inputEntry id="ie_3_1"><text>&lt;= 5</text></inputEntry>
+        <inputEntry id="ie_3_2"><text>"RJ"</text></inputEntry>
+        <inputEntry id="ie_3_3"><text>"SP"</text></inputEntry>
+        <outputEntry id="oe_3_1"><text>30.00</text></outputEntry>
+        <outputEntry id="oe_3_2"><text>"0%"</text></outputEntry>
       </rule>
-      <rule id="rule4">
-        <inputEntry id="inputEntry7">
-          <text><![CDATA[> 5]]></text>
-        </inputEntry>
-        <inputEntry id="inputEntry8">
-          <text><![CDATA["RJ"]]></text>
-        </inputEntry>
-        <outputEntry id="outputEntry4">
-          <text><![CDATA[25]]></text>
-        </outputEntry>
+      <rule id="rule_4">
+        <description>Peso ate 5kg, RJ para outros estados</description>
+        <inputEntry id="ie_4_1"><text>&lt;= 5</text></inputEntry>
+        <inputEntry id="ie_4_2"><text>"RJ"</text></inputEntry>
+        <inputEntry id="ie_4_3"><text>not("SP")</text></inputEntry>
+        <outputEntry id="oe_4_1"><text>30.00</text></outputEntry>
+        <outputEntry id="oe_4_2"><text>"10%"</text></outputEntry>
       </rule>
-      <rule id="rule5">
-        <inputEntry id="inputEntry9">
-          <text><![CDATA[-]]></text>
-        </inputEntry>
-        <inputEntry id="inputEntry10">
-          <text><![CDATA["Outro"]]></text>
-        </inputEntry>
-        <outputEntry id="outputEntry5">
-          <text><![CDATA[40]]></text>
-        </outputEntry>
+      <rule id="rule_5">
+        <description>Peso acima de 5kg, SP para RJ</description>
+        <inputEntry id="ie_5_1"><text>&gt; 5</text></inputEntry>
+        <inputEntry id="ie_5_2"><text>"SP"</text></inputEntry>
+        <inputEntry id="ie_5_3"><text>"RJ"</text></inputEntry>
+        <outputEntry id="oe_5_1"><text>40.00</text></outputEntry>
+        <outputEntry id="oe_5_2"><text>"0%"</text></outputEntry>
+      </rule>
+      <rule id="rule_6">
+        <description>Peso acima de 5kg, SP para outros estados</description>
+        <inputEntry id="ie_6_1"><text>&gt; 5</text></inputEntry>
+        <inputEntry id="ie_6_2"><text>"SP"</text></inputEntry>
+        <inputEntry id="ie_6_3"><text>not("RJ")</text></inputEntry>
+        <outputEntry id="oe_6_1"><text>40.00</text></outputEntry>
+        <outputEntry id="oe_6_2"><text>"10%"</text></outputEntry>
+      </rule>
+      <rule id="rule_7">
+        <description>Peso acima de 5kg, RJ para SP</description>
+        <inputEntry id="ie_7_1"><text>&gt; 5</text></inputEntry>
+        <inputEntry id="ie_7_2"><text>"RJ"</text></inputEntry>
+        <inputEntry id="ie_7_3"><text>"SP"</text></inputEntry>
+        <outputEntry id="oe_7_1"><text>40.00</text></outputEntry>
+        <outputEntry id="oe_7_2"><text>"0%"</text></outputEntry>
+      </rule>
+      <rule id="rule_8">
+        <description>Peso acima de 5kg, RJ para outros estados</description>
+        <inputEntry id="ie_8_1"><text>&gt; 5</text></inputEntry>
+        <inputEntry id="ie_8_2"><text>"RJ"</text></inputEntry>
+        <inputEntry id="ie_8_3"><text>not("SP")</text></inputEntry>
+        <outputEntry id="oe_8_1"><text>40.00</text></outputEntry>
+        <outputEntry id="oe_8_2"><text>"10%"</text></outputEntry>
+      </rule>
+      <rule id="rule_9">
+        <description>Outros estados</description>
+        <inputEntry id="ie_9_1"><text>true</text></inputEntry>
+        <inputEntry id="ie_9_2"><text>not("SP") and not("RJ")</text></inputEntry>
+        <inputEntry id="ie_9_3"><text>true</text></inputEntry>
+        <outputEntry id="oe_9_1"><text>40.00</text></outputEntry>
+        <outputEntry id="oe_9_2"><text>"0%"</text></outputEntry>
       </rule>
     </decisionTable>
   </decision>
+
 </definitions>
