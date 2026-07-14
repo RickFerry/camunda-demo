@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/" id="calcular-descontos" name="Calcular Descontos" namespace="http://camunda.org/schema/1.0/dmn" exporter="Camunda Modeler" exporterVersion="5.48.0">
+  <decision id="calcularDescontos" name="Calcular Descontos">
+    <decisionTable id="decisionTable" hitPolicy="COLLECT" aggregation="SUM">
+      <input id="input1" label="Categoria">
+        <inputExpression id="inputExpression1" typeRef="string">
+          <text>categoria</text>
+        </inputExpression>
+      </input>
+      <input id="input2" label="Valor">
+        <inputExpression id="inputExpression2" typeRef="double">
+          <text>valor</text>
+        </inputExpression>
+      </input>
+      <output id="output1" label="Desconto" typeRef="double" />
+      <rule id="rule1">
+        <inputEntry id="inputEntry1">
+          <text>"VIP"</text>
+        </inputEntry>
+        <inputEntry id="inputEntry2">
+          <text>-</text>
+        </inputEntry>
+        <outputEntry id="outputEntry1">
+          <text>0.10</text>
+        </outputEntry>
+      </rule>
+      <rule id="rule2">
+        <inputEntry id="inputEntry3">
+          <text>-</text>
+        </inputEntry>
+        <inputEntry id="inputEntry4">
+          <text>&gt; 1000</text>
+        </inputEntry>
+        <outputEntry id="outputEntry2">
+          <text>0.05</text>
+        </outputEntry>
+      </rule>
+      <rule id="rule3">
+        <inputEntry id="inputEntry5">
+          <text>"PrimeiroPedido"</text>
+        </inputEntry>
+        <inputEntry id="inputEntry6">
+          <text>-</text>
+        </inputEntry>
+        <outputEntry id="outputEntry3">
+          <text>0.03</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/"
+             xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/"
+             xmlns:camunda="http://camunda.org/schema/1.0/dmn"
+             id="calcular-frete" name="Calcular Frete"
+             namespace="http://camunda.org/schema/1.0/dmn">
+  <decision id="calcularFrete" name="Calcular Frete">
+    <decisionTable id="decisionTable" hitPolicy="UNIQUE">
+      <input id="input1" label="Peso">
+        <inputExpression id="inputExpression1" typeRef="double">
+          <text>peso</text>
+        </inputExpression>
+      </input>
+      <input id="input2" label="Destino">
+        <inputExpression id="inputExpression2" typeRef="string">
+          <text>destino</text>
+        </inputExpression>
+      </input>
+      <output id="output1" label="Valor Frete" name="valorFrete" typeRef="double"/>
+      <rule id="rule1">
+        <inputEntry id="inputEntry1">
+          <text><![CDATA[<= 5]]></text>
+        </inputEntry>
+        <inputEntry id="inputEntry2">
+          <text><![CDATA["SP"]]></text>
+        </inputEntry>
+        <outputEntry id="outputEntry1">
+          <text><![CDATA[10]]></text>
+        </outputEntry>
+      </rule>
+      <rule id="rule2">
+        <inputEntry id="inputEntry3">
+          <text><![CDATA[> 5]]></text>
+        </inputEntry>
+        <inputEntry id="inputEntry4">
+          <text><![CDATA["SP"]]></text>
+        </inputEntry>
+        <outputEntry id="outputEntry2">
+          <text><![CDATA[20]]></text>
+        </outputEntry>
+      </rule>
+      <rule id="rule3">
+        <inputEntry id="inputEntry5">
+          <text><![CDATA[<= 5]]></text>
+        </inputEntry>
+        <inputEntry id="inputEntry6">
+          <text><![CDATA["RJ"]]></text>
+        </inputEntry>
+        <outputEntry id="outputEntry3">
+          <text><![CDATA[15]]></text>
+        </outputEntry>
+      </rule>
+      <rule id="rule4">
+        <inputEntry id="inputEntry7">
+          <text><![CDATA[> 5]]></text>
+        </inputEntry>
+        <inputEntry id="inputEntry8">
+          <text><![CDATA["RJ"]]></text>
+        </inputEntry>
+        <outputEntry id="outputEntry4">
+          <text><![CDATA[25]]></text>
+        </outputEntry>
+      </rule>
+      <rule id="rule5">
+        <inputEntry id="inputEntry9">
+          <text><![CDATA[-]]></text>
+        </inputEntry>
+        <inputEntry id="inputEntry10">
+          <text><![CDATA["Outro"]]></text>
+        </inputEntry>
+        <outputEntry id="outputEntry5">
+          <text><![CDATA[40]]></text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>
