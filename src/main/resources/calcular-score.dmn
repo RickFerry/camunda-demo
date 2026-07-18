@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<definitions xmlns="https://www.omg.org/spec/DMN/20191111/MODEL/"
+             xmlns:dmndi="https://www.omg.org/spec/DMN/20191111/DMNDI/"
+             xmlns:dc="http://www.omg.org/spec/DMN/20180521/DC/"
+             xmlns:camunda="http://camunda.org/schema/1.0/dmn"
+             id="calcular-Score" name="Calcular Score"
+             namespace="http://camunda.org/schema/1.0/dmn">
+  <decision id="calcularScore" name="Calcular Score de Crédito" camunda:historyTimeToLive="P30D">
+    <decisionTable id="decisionTable" hitPolicy="UNIQUE">
+      <input id="input1" label="Idade">
+        <inputExpression id="inputExpression1" typeRef="long">
+          <text>idade</text>
+        </inputExpression>
+      </input>
+      <input id="input2" label="Renda Comprovada">
+        <inputExpression id="inputExpression2" typeRef="long">
+          <text>renda</text>
+        </inputExpression>
+      </input>
+      <output id="output1" label="Score" name="scoreCalculado" typeRef="double"/>
+      <rule id="rule1">
+        <description>Criança: score baixo (não aplicável)</description>
+        <inputEntry id="inputEntry1">
+          <text><![CDATA[< 13]]></text>
+        </inputEntry>
+        <inputEntry id="inputEntry4">
+          <text>-</text>
+        </inputEntry>
+        <outputEntry id="outputEntry1">
+          <text>100</text>
+        </outputEntry>
+      </rule>
+      <rule id="rule2">
+        <description>Adolescente: score baixo (não aplicável)</description>
+        <inputEntry id="inputEntry2">
+          <text><![CDATA[[13..17]]]></text>
+        </inputEntry>
+        <inputEntry id="inputEntry5">
+          <text>-</text>
+        </inputEntry>
+        <outputEntry id="outputEntry2">
+          <text>150</text>
+        </outputEntry>
+      </rule>
+      <rule id="rule3">
+        <description>Adulto com renda baixa</description>
+        <inputEntry id="inputEntry3">
+          <text><![CDATA[[18..59]]]></text>
+        </inputEntry>
+        <inputEntry id="inputEntry6">
+          <text><![CDATA[< 2000]]></text>
+        </inputEntry>
+        <outputEntry id="outputEntry3">
+          <text>350</text>
+        </outputEntry>
+      </rule>
+      <rule id="rule4">
+        <description>Adulto com renda media-baixa</description>
+        <inputEntry id="inputEntry7">
+          <text><![CDATA[[18..59]]]></text>
+        </inputEntry>
+        <inputEntry id="inputEntry8">
+          <text><![CDATA[[2000..5000]]]></text>
+        </inputEntry>
+        <outputEntry id="outputEntry4">
+          <text>550</text>
+        </outputEntry>
+      </rule>
+      <rule id="rule5">
+        <description>Adulto com renda media</description>
+        <inputEntry id="inputEntry9">
+          <text><![CDATA[[18..59]]]></text>
+        </inputEntry>
+        <inputEntry id="inputEntry10">
+          <text><![CDATA[[5000..10000]]]></text>
+        </inputEntry>
+        <outputEntry id="outputEntry5">
+          <text>700</text>
+        </outputEntry>
+      </rule>
+      <rule id="rule6">
+        <description>Adulto com renda alta</description>
+        <inputEntry id="inputEntry11">
+          <text><![CDATA[[18..59]]]></text>
+        </inputEntry>
+        <inputEntry id="inputEntry12">
+          <text><![CDATA[> 10000]]></text>
+        </inputEntry>
+        <outputEntry id="outputEntry6">
+          <text>850</text>
+        </outputEntry>
+      </rule>
+      <rule id="rule7">
+        <description>Idoso: score variavel (analise manual)</description>
+        <inputEntry id="inputEntry13">
+          <text><![CDATA[>= 60]]></text>
+        </inputEntry>
+        <inputEntry id="inputEntry14">
+          <text>-</text>
+        </inputEntry>
+        <outputEntry id="outputEntry7">
+          <text>500</text>
+        </outputEntry>
+      </rule>
+    </decisionTable>
+  </decision>
+</definitions>

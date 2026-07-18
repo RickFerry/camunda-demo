@@ -19,17 +19,22 @@ public class NotificarRejeicaoDelegate implements JavaDelegate {
             return;
         }
 
-        Object scoreObj = execution.getVariable("score");
-        Integer score = scoreObj != null ? (Integer) scoreObj : null;
+        Object scoreObj = execution.getVariable("scoreCalculado");
+        Double score = scoreObj != null ? ((Number) scoreObj).doubleValue() : null;
         boolean aprovado = execution.getVariable("aprovado") != null
                 && (boolean) execution.getVariable("aprovado");
 
         StringBuilder motivo = new StringBuilder();
-        if (score != null && score <= 700) {
-            motivo.append("Score insuficiente (").append(score).append("). ");
+        if (score != null && score < 600) {
+            motivo.append("Score insuficiente (").append(score.intValue()).append("). ");
         }
         if (!aprovado) {
-            motivo.append("Reprovado na análise manual.");
+            String motivoAnalise = (String) execution.getVariable("motivoRejeicao");
+            if (motivoAnalise != null && !motivoAnalise.isBlank()) {
+                motivo.append(motivoAnalise);
+            } else {
+                motivo.append("Reprovado na análise manual.");
+            }
         }
 
         String motivoFinal = motivo.toString().trim();

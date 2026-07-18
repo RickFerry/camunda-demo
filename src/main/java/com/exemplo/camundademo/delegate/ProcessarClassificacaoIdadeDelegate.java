@@ -9,36 +9,38 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProcessarClassificacaoIdadeDelegate implements JavaDelegate {
 
-    public static final String MENOR_DE_IDADE = "menorDeIdade";
-
     @Override
     public void execute(DelegateExecution execution) {
         String classificacao = (String) execution.getVariable("classificacaoIdade");
         Long idade = (Long) execution.getVariable("idade");
         String nome = (String) execution.getVariable("nome");
 
+        log.info("=== Classificação de Idade ===");
         log.info("Cliente: {}", nome);
         log.info("Idade: {}", idade);
         log.info("Classificação DMN: {}", classificacao);
 
         switch (classificacao) {
             case "Criança", "Adolescente":
-                execution.setVariable(MENOR_DE_IDADE, true);
+                log.info("→ Menor de idade: conta não pode ser aberta sozinha");
+                execution.setVariable("menorDeIdade", true);
                 execution.setVariable("motivoRejeicao", "Menor de idade (" + classificacao + ")");
                 break;
             case "Adulto":
                 log.info("→ Maior de idade: prosseguindo com verificação de score");
-                execution.setVariable(MENOR_DE_IDADE, false);
+                execution.setVariable("menorDeIdade", false);
                 execution.setVariable("tratamentoEspecial", false);
                 break;
             case "Idoso":
-                System.out.println("→ Idoso: score diferenciado (threshold 600). Prosseguindo com verificação de score.");
+                log.info("→ Idoso: indo direto para Análise Manual (regras diferenciadas)");
                 execution.setVariable("menorDeIdade", false);
                 execution.setVariable("tratamentoEspecial", true);
+                execution.setVariable("motivoAnaliseManual",
+                    "Cliente idoso — regras de crédito diferenciadas");
                 break;
             default:
                 log.info("→ Classificação desconhecida: {}", classificacao);
-                execution.setVariable(MENOR_DE_IDADE, false);
+                execution.setVariable("menorDeIdade", false);
                 break;
         }
     }

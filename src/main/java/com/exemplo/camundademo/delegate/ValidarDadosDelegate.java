@@ -11,20 +11,20 @@ public class ValidarDadosDelegate implements JavaDelegate {
     public void execute(DelegateExecution execution) {
         String cpf = (String) execution.getVariable("cpf");
         String nome = (String) execution.getVariable("nome");
-        String endereco = (String) execution.getVariable("endereco");
         Object idade = execution.getVariable("idade");
+        Object renda = execution.getVariable("renda");
 
         if (nome == null || nome.isBlank()) {
             throw new RuntimeException("Nome obrigatório");
-        }
-        if (endereco == null || endereco.isBlank()) {
-            throw new RuntimeException("Endereço obrigatório");
         }
         if (cpf == null || cpf.replaceAll("\\D", "").length() != 11) {
             throw new RuntimeException("CPF inválido");
         }
         if (idade == null) {
             throw new RuntimeException("Idade é obrigatória");
+        }
+        if (renda == null) {
+            throw new RuntimeException("Renda comprovada é obrigatória");
         }
 
         execution.setVariable("dadosValidos", true);

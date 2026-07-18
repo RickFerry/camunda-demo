@@ -3,19 +3,19 @@
   <bpmn:process id="abertura-conta" name="Abertura de Conta Bancária" isExecutable="true" camunda:historyTimeToLive="30">
     <bpmn:laneSet>
       <bpmn:lane id="lane-analista" name="Analista">
-        <bpmn:flowNodeRef>Activity_5</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Activity_6</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_2</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_5</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="lane-sistema" name="Sistema">
         <bpmn:flowNodeRef>Activity_2</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Activity_ClassificarIdade</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Activity_NotificarIdade</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Activity_3</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Activity_7</bpmn:flowNodeRef>
-        <bpmn:flowNodeRef>Activity_8</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_CalcularScore</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_Age</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>Gateway_Score</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_6</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_7</bpmn:flowNodeRef>
+        <bpmn:flowNodeRef>Activity_8</bpmn:flowNodeRef>
         <bpmn:flowNodeRef>EndEvent_1</bpmn:flowNodeRef>
       </bpmn:lane>
       <bpmn:lane id="lane-cliente" name="Cliente">
@@ -29,8 +29,8 @@
         <camunda:formData>
           <camunda:formField id="nome" label="Nome Completo" type="string" />
           <camunda:formField id="cpf" label="CPF" type="string" />
-          <camunda:formField id="endereco" label="Endereço" type="string" />
           <camunda:formField id="idade" label="Idade" type="long" />
+          <camunda:formField id="renda" label="Renda Comprovada" type="double" />
         </camunda:formData>
       </bpmn:extensionElements>
     </bpmn:userTask>
@@ -39,44 +39,48 @@
       <bpmn:extensionElements>
         <camunda:executionListener delegateExpression="${processarClassificacaoIdadeDelegate}" event="end" />
       </bpmn:extensionElements>
-      <bpmn:outgoing>Flow_117lof8</bpmn:outgoing>
     </bpmn:businessRuleTask>
     <bpmn:exclusiveGateway id="Gateway_Age" name="Maior de idade?" default="Flow_Age_Nao">
       <bpmn:extensionElements />
-      <bpmn:incoming>Flow_117lof8</bpmn:incoming>
-      <bpmn:outgoing>Flow_Age_Idoso</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:serviceTask id="Activity_NotificarIdade" name="Notificar Restrição de Idade" camunda:class="com.exemplo.camundademo.delegate.NotificarRejeicaoDelegate" />
-    <bpmn:serviceTask id="Activity_3" name="Verificar Score de Crédito" camunda:class="com.exemplo.camundademo.delegate.VerificarScoreDelegate" />
-    <bpmn:exclusiveGateway id="Gateway_Score" name="Score &#62; 700?" default="Flow_Score_Reprovado">
+    <bpmn:businessRuleTask id="Activity_CalcularScore" name="Calcular Score de Crédito" camunda:resultVariable="scoreCalculado" camunda:decisionRef="calcularScore" camunda:mapDecisionResult="singleResult">
+      <bpmn:extensionElements>
+        <camunda:executionListener delegateExpression="${verificarScoreDelegate}" event="end" />
+      </bpmn:extensionElements>
+    </bpmn:businessRuleTask>
+    <bpmn:exclusiveGateway id="Gateway_Score" name="Score ≥ 600?" default="Flow_Score_Reprovado">
       <bpmn:extensionElements />
-      <bpmn:outgoing>Flow_0wf0oa5</bpmn:outgoing>
     </bpmn:exclusiveGateway>
     <bpmn:userTask id="Activity_5" name="Análise Manual" camunda:assignee="demo">
       <bpmn:extensionElements>
         <camunda:formData>
           <camunda:formField id="aprovado" label="Cliente aprovado?" type="boolean" defaultValue="false" />
+          <camunda:formField id="motivoRejeicao" label="Motivo da Rejeição (se reprovado)" type="string" />
         </camunda:formData>
       </bpmn:extensionElements>
-      <bpmn:incoming>Flow_Age_Idoso</bpmn:incoming>
     </bpmn:userTask>
     <bpmn:exclusiveGateway id="Gateway_2" name="Aprovado?" default="Flow_10" />
     <bpmn:serviceTask id="Activity_6" name="Notificar Rejeição" camunda:class="com.exemplo.camundademo.delegate.NotificarRejeicaoDelegate" />
-    <bpmn:serviceTask id="Activity_7" name="Gerar Conta" camunda:class="com.exemplo.camundademo.delegate.GerarContaDelegate">
-      <bpmn:incoming>Flow_9</bpmn:incoming>
-      <bpmn:incoming>Flow_0wf0oa5</bpmn:incoming>
-    </bpmn:serviceTask>
+    <bpmn:serviceTask id="Activity_7" name="Gerar Conta" camunda:class="com.exemplo.camundademo.delegate.GerarContaDelegate" />
     <bpmn:serviceTask id="Activity_8" name="Enviar Cartão" camunda:class="com.exemplo.camundademo.delegate.EnviarCartaoDelegate" />
     <bpmn:endEvent id="EndEvent_1" name="Fim" />
     <bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Activity_1" />
     <bpmn:sequenceFlow id="Flow_2" sourceRef="Activity_1" targetRef="Activity_2" />
     <bpmn:sequenceFlow id="Flow_Classificar" sourceRef="Activity_2" targetRef="Activity_ClassificarIdade" />
-    <bpmn:sequenceFlow id="Flow_Age_Adulto" sourceRef="Gateway_Age" targetRef="Activity_3">
+    <bpmn:sequenceFlow id="Flow_117lof8" sourceRef="Activity_ClassificarIdade" targetRef="Gateway_Age" />
+    <bpmn:sequenceFlow id="Flow_Age_Idoso" sourceRef="Gateway_Age" targetRef="Activity_5">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${classificacaoIdade == "Idoso"}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
+    <bpmn:sequenceFlow id="Flow_Age_Adulto" sourceRef="Gateway_Age" targetRef="Activity_CalcularScore">
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${classificacaoIdade == "Adulto"}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_Age_Nao" sourceRef="Gateway_Age" targetRef="Activity_NotificarIdade" />
     <bpmn:sequenceFlow id="Flow_Age_Notificar" sourceRef="Activity_NotificarIdade" targetRef="EndEvent_1" />
-    <bpmn:sequenceFlow id="Flow_3" sourceRef="Activity_3" targetRef="Gateway_Score" />
+    <bpmn:sequenceFlow id="Flow_Score_Calc" sourceRef="Activity_CalcularScore" targetRef="Gateway_Score" />
+    <bpmn:sequenceFlow id="Flow_Score_Aprovado" sourceRef="Gateway_Score" targetRef="Activity_7">
+      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${scoreCalculado &gt;= 600}</bpmn:conditionExpression>
+    </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_Score_Reprovado" sourceRef="Gateway_Score" targetRef="Activity_5" />
     <bpmn:sequenceFlow id="Flow_8" sourceRef="Activity_5" targetRef="Gateway_2" />
     <bpmn:sequenceFlow id="Flow_9" sourceRef="Gateway_2" targetRef="Activity_7">
@@ -86,22 +90,17 @@
     <bpmn:sequenceFlow id="Flow_11" sourceRef="Activity_6" targetRef="EndEvent_1" />
     <bpmn:sequenceFlow id="Flow_13" sourceRef="Activity_7" targetRef="Activity_8" />
     <bpmn:sequenceFlow id="Flow_14" sourceRef="Activity_8" targetRef="EndEvent_1" />
-    <bpmn:sequenceFlow id="Flow_117lof8" sourceRef="Activity_ClassificarIdade" targetRef="Gateway_Age" />
-    <bpmn:sequenceFlow id="Flow_Age_Idoso" sourceRef="Gateway_Age" targetRef="Activity_5">
-      <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${classificacaoIdade == "Idoso"}</bpmn:conditionExpression>
-    </bpmn:sequenceFlow>
-    <bpmn:sequenceFlow id="Flow_0wf0oa5" sourceRef="Gateway_Score" targetRef="Activity_7" />
   </bpmn:process>
   <bpmndi:BPMNDiagram id="BPMNDiagram_1">
     <bpmndi:BPMNPlane id="BPMNPlane_1" bpmnElement="abertura-conta">
       <bpmndi:BPMNShape id="lane-cliente_di" bpmnElement="lane-cliente" isHorizontal="true">
-        <dc:Bounds x="160" y="80" width="1570" height="140" />
+        <dc:Bounds x="160" y="80" width="1520" height="140" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="lane-sistema_di" bpmnElement="lane-sistema" isHorizontal="true">
-        <dc:Bounds x="160" y="220" width="1570" height="300" />
+        <dc:Bounds x="160" y="220" width="1520" height="300" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="lane-analista_di" bpmnElement="lane-analista" isHorizontal="true">
-        <dc:Bounds x="160" y="520" width="1570" height="150" />
+        <dc:Bounds x="160" y="520" width="1520" height="150" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="StartEvent_1_di" bpmnElement="StartEvent_1">
         <dc:Bounds x="200" y="128" width="36" height="36" />
@@ -116,28 +115,25 @@
         <dc:Bounds x="290" y="280" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_ClassificarIdade_di" bpmnElement="Activity_ClassificarIdade">
-        <dc:Bounds x="620" y="280" width="100" height="80" />
+        <dc:Bounds x="450" y="280" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_Age_di" bpmnElement="Gateway_Age" isMarkerVisible="true">
-        <dc:Bounds x="785" y="295" width="50" height="50" />
+        <dc:Bounds x="615" y="295" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="770" y="279" width="79" height="14" />
+          <dc:Bounds x="600" y="279" width="79" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_NotificarIdade_di" bpmnElement="Activity_NotificarIdade">
         <dc:Bounds x="1130" y="430" width="120" height="80" />
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_3_di" bpmnElement="Activity_3">
-        <dc:Bounds x="900" y="280" width="100" height="80" />
+      <bpmndi:BPMNShape id="Activity_CalcularScore_di" bpmnElement="Activity_CalcularScore">
+        <dc:Bounds x="740" y="280" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_Score_di" bpmnElement="Gateway_Score" isMarkerVisible="true">
-        <dc:Bounds x="1065" y="295" width="50" height="50" />
+        <dc:Bounds x="905" y="295" width="50" height="50" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1057" y="279" width="66" height="14" />
+          <dc:Bounds x="890" y="279" width="80" height="14" />
         </bpmndi:BPMNLabel>
-      </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_5_di" bpmnElement="Activity_5">
-        <dc:Bounds x="440" y="560" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Gateway_2_di" bpmnElement="Gateway_2" isMarkerVisible="true">
         <dc:Bounds x="1025" y="595" width="50" height="50" />
@@ -145,20 +141,23 @@
           <dc:Bounds x="1023" y="655" width="54" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Activity_6_di" bpmnElement="Activity_6">
+        <dc:Bounds x="1290" y="580" width="100" height="80" />
+      </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_7_di" bpmnElement="Activity_7">
-        <dc:Bounds x="1220" y="280" width="100" height="80" />
+        <dc:Bounds x="1180" y="280" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_8_di" bpmnElement="Activity_8">
-        <dc:Bounds x="1410" y="280" width="100" height="80" />
+        <dc:Bounds x="1360" y="280" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="EndEvent_1_di" bpmnElement="EndEvent_1">
-        <dc:Bounds x="1602" y="302" width="36" height="36" />
+        <dc:Bounds x="1532" y="302" width="36" height="36" />
         <bpmndi:BPMNLabel>
-          <dc:Bounds x="1610" y="282" width="19" height="14" />
+          <dc:Bounds x="1540" y="282" width="19" height="14" />
         </bpmndi:BPMNLabel>
       </bpmndi:BPMNShape>
-      <bpmndi:BPMNShape id="Activity_6_di" bpmnElement="Activity_6">
-        <dc:Bounds x="1290" y="560" width="100" height="80" />
+      <bpmndi:BPMNShape id="Activity_5_di" bpmnElement="Activity_5">
+        <dc:Bounds x="530" y="580" width="100" height="80" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNEdge id="Flow_1_di" bpmnElement="Flow_1">
         <di:waypoint x="236" y="147" />
@@ -170,72 +169,71 @@
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_Classificar_di" bpmnElement="Flow_Classificar">
         <di:waypoint x="390" y="320" />
-        <di:waypoint x="620" y="320" />
+        <di:waypoint x="450" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_117lof8_di" bpmnElement="Flow_117lof8">
+        <di:waypoint x="550" y="320" />
+        <di:waypoint x="615" y="320" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_Age_Idoso_di" bpmnElement="Flow_Age_Idoso">
-        <di:waypoint x="810" y="295" />
-        <di:waypoint x="810" y="250" />
-        <di:waypoint x="490" y="250" />
-        <di:waypoint x="490" y="560" />
+        <di:waypoint x="640" y="295" />
+        <di:waypoint x="640" y="270" />
+        <di:waypoint x="580" y="270" />
+        <di:waypoint x="580" y="580" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_Age_Adulto_di" bpmnElement="Flow_Age_Adulto">
-        <di:waypoint x="835" y="320" />
-        <di:waypoint x="900" y="320" />
+        <di:waypoint x="665" y="320" />
+        <di:waypoint x="740" y="320" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_Age_Nao_di" bpmnElement="Flow_Age_Nao">
-        <di:waypoint x="810" y="345" />
-        <di:waypoint x="810" y="470" />
+        <di:waypoint x="640" y="345" />
+        <di:waypoint x="640" y="470" />
         <di:waypoint x="1130" y="470" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_Age_Notificar_di" bpmnElement="Flow_Age_Notificar">
         <di:waypoint x="1250" y="470" />
-        <di:waypoint x="1620" y="470" />
-        <di:waypoint x="1620" y="338" />
+        <di:waypoint x="1550" y="470" />
+        <di:waypoint x="1550" y="338" />
       </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_3_di" bpmnElement="Flow_3">
-        <di:waypoint x="1000" y="320" />
-        <di:waypoint x="1065" y="320" />
+      <bpmndi:BPMNEdge id="Flow_Score_Calc_di" bpmnElement="Flow_Score_Calc">
+        <di:waypoint x="840" y="320" />
+        <di:waypoint x="905" y="320" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Score_Aprovado_di" bpmnElement="Flow_Score_Aprovado">
+        <di:waypoint x="955" y="320" />
+        <di:waypoint x="1180" y="320" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_Score_Reprovado_di" bpmnElement="Flow_Score_Reprovado">
-        <di:waypoint x="1090" y="345" />
-        <di:waypoint x="1090" y="570" />
-        <di:waypoint x="540" y="570" />
+        <di:waypoint x="930" y="345" />
+        <di:waypoint x="930" y="590" />
+        <di:waypoint x="630" y="590" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_8_di" bpmnElement="Flow_8">
-        <di:waypoint x="540" y="620" />
+        <di:waypoint x="630" y="620" />
         <di:waypoint x="1025" y="620" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_9_di" bpmnElement="Flow_9">
         <di:waypoint x="1050" y="595" />
-        <di:waypoint x="1050" y="230" />
-        <di:waypoint x="1270" y="230" />
-        <di:waypoint x="1270" y="280" />
+        <di:waypoint x="1050" y="250" />
+        <di:waypoint x="1230" y="250" />
+        <di:waypoint x="1230" y="280" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_10_di" bpmnElement="Flow_10">
         <di:waypoint x="1075" y="620" />
         <di:waypoint x="1290" y="620" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_11_di" bpmnElement="Flow_11">
-        <di:waypoint x="1390" y="600" />
-        <di:waypoint x="1680" y="600" />
-        <di:waypoint x="1680" y="320" />
-        <di:waypoint x="1640" y="320" />
+        <di:waypoint x="1390" y="620" />
+        <di:waypoint x="1550" y="620" />
+        <di:waypoint x="1550" y="338" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_13_di" bpmnElement="Flow_13">
-        <di:waypoint x="1320" y="320" />
-        <di:waypoint x="1410" y="320" />
+        <di:waypoint x="1280" y="320" />
+        <di:waypoint x="1360" y="320" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_14_di" bpmnElement="Flow_14">
-        <di:waypoint x="1510" y="320" />
-        <di:waypoint x="1602" y="320" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_117lof8_di" bpmnElement="Flow_117lof8">
-        <di:waypoint x="720" y="320" />
-        <di:waypoint x="785" y="320" />
-      </bpmndi:BPMNEdge>
-      <bpmndi:BPMNEdge id="Flow_0wf0oa5_di" bpmnElement="Flow_0wf0oa5">
-        <di:waypoint x="1115" y="320" />
-        <di:waypoint x="1220" y="320" />
+        <di:waypoint x="1460" y="320" />
+        <di:waypoint x="1532" y="320" />
       </bpmndi:BPMNEdge>
     </bpmndi:BPMNPlane>
   </bpmndi:BPMNDiagram>
