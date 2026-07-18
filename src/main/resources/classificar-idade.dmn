@@ -8,7 +8,7 @@
   <decision id="classificarIdade" name="Classificar Idade" camunda:historyTimeToLive="P30D">
     <decisionTable id="decisionTable" hitPolicy="UNIQUE">
       <input id="input1" label="Idade">
-        <inputExpression id="inputExpression1" typeRef="double">
+        <inputExpression id="inputExpression1" typeRef="long">
           <text>idade</text>
         </inputExpression>
       </input>

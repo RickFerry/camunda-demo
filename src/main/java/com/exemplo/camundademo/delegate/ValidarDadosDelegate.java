@@ -12,6 +12,7 @@ public class ValidarDadosDelegate implements JavaDelegate {
         String cpf = (String) execution.getVariable("cpf");
         String nome = (String) execution.getVariable("nome");
         String endereco = (String) execution.getVariable("endereco");
+        Object idade = execution.getVariable("idade");
 
         if (nome == null || nome.isBlank()) {
             throw new RuntimeException("Nome obrigatório");
@@ -21,6 +22,9 @@ public class ValidarDadosDelegate implements JavaDelegate {
         }
         if (cpf == null || cpf.replaceAll("\\D", "").length() != 11) {
             throw new RuntimeException("CPF inválido");
+        }
+        if (idade == null) {
+            throw new RuntimeException("Idade é obrigatória");
         }
 
         execution.setVariable("dadosValidos", true);

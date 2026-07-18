@@ -12,18 +12,28 @@ public class NotificarRejeicaoDelegate implements JavaDelegate {
     @Override
     public void execute(DelegateExecution execution) {
         String nome = (String) execution.getVariable("nome");
-        int score = (int) execution.getVariable("score");
-        boolean aprovado = execution.getVariable("aprovado") != null && (boolean) execution.getVariable("aprovado");
+        String motivoExistente = (String) execution.getVariable("motivoRejeicao");
+
+        if (motivoExistente != null && !motivoExistente.isBlank()) {
+            log.warn("Cliente {} rejeitado: {}", nome, motivoExistente);
+            return;
+        }
+
+        Object scoreObj = execution.getVariable("score");
+        Integer score = scoreObj != null ? (Integer) scoreObj : null;
+        boolean aprovado = execution.getVariable("aprovado") != null
+                && (boolean) execution.getVariable("aprovado");
 
         StringBuilder motivo = new StringBuilder();
-        if (score <= 700) {
+        if (score != null && score <= 700) {
             motivo.append("Score insuficiente (").append(score).append("). ");
         }
         if (!aprovado) {
             motivo.append("Reprovado na análise manual.");
         }
 
-        log.warn("Cliente {} rejeitado: {}", nome, motivo);
-        execution.setVariable("motivoRejeicao", motivo.toString());
+        String motivoFinal = motivo.toString().trim();
+        log.warn("Cliente {} rejeitado: {}", nome, motivoFinal);
+        execution.setVariable("motivoRejeicao", motivoFinal);
     }
 }
