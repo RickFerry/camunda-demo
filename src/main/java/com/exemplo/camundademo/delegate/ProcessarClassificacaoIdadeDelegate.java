@@ -9,6 +9,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class ProcessarClassificacaoIdadeDelegate implements JavaDelegate {
 
+    public static final String MENOR_DE_IDADE = "menorDeIdade";
+
     @Override
     public void execute(DelegateExecution execution) {
         String classificacao = (String) execution.getVariable("classificacaoIdade");
@@ -23,24 +25,24 @@ public class ProcessarClassificacaoIdadeDelegate implements JavaDelegate {
         switch (classificacao) {
             case "Criança", "Adolescente":
                 log.info("→ Menor de idade: conta não pode ser aberta sozinha");
-                execution.setVariable("menorDeIdade", true);
+                execution.setVariable(MENOR_DE_IDADE, true);
                 execution.setVariable("motivoRejeicao", "Menor de idade (" + classificacao + ")");
                 break;
             case "Adulto":
                 log.info("→ Maior de idade: prosseguindo com verificação de score");
-                execution.setVariable("menorDeIdade", false);
+                execution.setVariable(MENOR_DE_IDADE, false);
                 execution.setVariable("tratamentoEspecial", false);
                 break;
             case "Idoso":
                 log.info("→ Idoso: indo direto para Análise Manual (regras diferenciadas)");
-                execution.setVariable("menorDeIdade", false);
+                execution.setVariable(MENOR_DE_IDADE, false);
                 execution.setVariable("tratamentoEspecial", true);
                 execution.setVariable("motivoAnaliseManual",
-                    "Cliente idoso — regras de crédito diferenciadas");
+                        "Cliente idoso — regras de crédito diferenciadas");
                 break;
             default:
                 log.info("→ Classificação desconhecida: {}", classificacao);
-                execution.setVariable("menorDeIdade", false);
+                execution.setVariable(MENOR_DE_IDADE, false);
                 break;
         }
     }

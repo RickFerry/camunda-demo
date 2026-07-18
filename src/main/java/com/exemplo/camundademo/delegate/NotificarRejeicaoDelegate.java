@@ -9,10 +9,12 @@ import org.springframework.stereotype.Component;
 @Component
 public class NotificarRejeicaoDelegate implements JavaDelegate {
 
+    public static final String MOTIVO_REJEICAO = "motivoRejeicao";
+
     @Override
     public void execute(DelegateExecution execution) {
         String nome = (String) execution.getVariable("nome");
-        String motivoExistente = (String) execution.getVariable("motivoRejeicao");
+        String motivoExistente = (String) execution.getVariable(MOTIVO_REJEICAO);
 
         if (motivoExistente != null && !motivoExistente.isBlank()) {
             log.warn("Cliente {} rejeitado: {}", nome, motivoExistente);
@@ -29,7 +31,7 @@ public class NotificarRejeicaoDelegate implements JavaDelegate {
             motivo.append("Score insuficiente (").append(score.intValue()).append("). ");
         }
         if (!aprovado) {
-            String motivoAnalise = (String) execution.getVariable("motivoRejeicao");
+            String motivoAnalise = (String) execution.getVariable(MOTIVO_REJEICAO);
             if (motivoAnalise != null && !motivoAnalise.isBlank()) {
                 motivo.append(motivoAnalise);
             } else {
@@ -39,6 +41,6 @@ public class NotificarRejeicaoDelegate implements JavaDelegate {
 
         String motivoFinal = motivo.toString().trim();
         log.warn("Cliente {} rejeitado: {}", nome, motivoFinal);
-        execution.setVariable("motivoRejeicao", motivoFinal);
+        execution.setVariable(MOTIVO_REJEICAO, motivoFinal);
     }
 }
