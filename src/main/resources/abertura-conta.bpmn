@@ -1,5 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
 <bpmn:definitions xmlns:bpmn="http://www.omg.org/spec/BPMN/20100524/MODEL" xmlns:camunda="http://camunda.org/schema/1.0/bpmn" xmlns:bpmndi="http://www.omg.org/spec/BPMN/20100524/DI" xmlns:dc="http://www.omg.org/spec/DD/20100524/DC" xmlns:di="http://www.omg.org/spec/DD/20100524/DI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" targetNamespace="http://bpmn.io/schema/bpmn" exporter="Camunda Modeler" exporterVersion="5.49.0">
+  <bpmn:error id="Error_Validacao" name="Dados inválidos" errorCode="VALIDACAO_DADOS" />
   <bpmn:process id="abertura-conta" name="Abertura de Conta Bancária" isExecutable="true" camunda:historyTimeToLive="30">
     <bpmn:laneSet>
       <bpmn:lane id="lane-analista" name="Analista">
@@ -30,27 +30,21 @@
           <camunda:formField id="nome" label="Nome Completo" type="string" />
           <camunda:formField id="cpf" label="CPF" type="string" />
           <camunda:formField id="idade" label="Idade" type="long" />
-          <camunda:formField id="renda" label="Renda Comprovada" type="double" />
+          <camunda:formField id="renda" label="Renda Comprovada" type="long" />
         </camunda:formData>
       </bpmn:extensionElements>
     </bpmn:userTask>
-    <bpmn:serviceTask id="Activity_2" name="Validar Dados" camunda:class="com.exemplo.camundademo.delegate.ValidarDadosDelegate" />
+    <bpmn:serviceTask id="Activity_2" name="Validar Dados" camunda:delegateExpression="${validarDadosDelegate}" />
     <bpmn:businessRuleTask id="Activity_ClassificarIdade" name="Classificar Idade" camunda:resultVariable="classificacaoIdade" camunda:decisionRef="classificarIdade" camunda:mapDecisionResult="singleResult">
       <bpmn:extensionElements>
         <camunda:executionListener delegateExpression="${processarClassificacaoIdadeDelegate}" event="end" />
       </bpmn:extensionElements>
     </bpmn:businessRuleTask>
     <bpmn:exclusiveGateway id="Gateway_Age" name="Maior de idade?" default="Flow_Age_Nao">
-      <bpmn:extensionElements />
     </bpmn:exclusiveGateway>
-    <bpmn:serviceTask id="Activity_NotificarIdade" name="Notificar Restrição de Idade" camunda:class="com.exemplo.camundademo.delegate.NotificarRejeicaoDelegate" />
-    <bpmn:businessRuleTask id="Activity_CalcularScore" name="Calcular Score de Crédito" camunda:resultVariable="scoreCalculado" camunda:decisionRef="calcularScore" camunda:mapDecisionResult="singleResult">
-      <bpmn:extensionElements>
-        <camunda:executionListener delegateExpression="${verificarScoreDelegate}" event="end" />
-      </bpmn:extensionElements>
-    </bpmn:businessRuleTask>
+    <bpmn:serviceTask id="Activity_NotificarIdade" name="Notificar Restrição de Idade" camunda:delegateExpression="${notificarRejeicaoDelegate}" />
+    <bpmn:businessRuleTask id="Activity_CalcularScore" name="Calcular Score de Crédito" camunda:resultVariable="scoreCalculado" camunda:decisionRef="calcularScore" camunda:mapDecisionResult="singleResult" />
     <bpmn:exclusiveGateway id="Gateway_Score" name="Score ≥ 600?" default="Flow_Score_Reprovado">
-      <bpmn:extensionElements />
     </bpmn:exclusiveGateway>
     <bpmn:userTask id="Activity_5" name="Análise Manual" camunda:assignee="demo">
       <bpmn:extensionElements>
@@ -61,9 +55,9 @@
       </bpmn:extensionElements>
     </bpmn:userTask>
     <bpmn:exclusiveGateway id="Gateway_2" name="Aprovado?" default="Flow_10" />
-    <bpmn:serviceTask id="Activity_6" name="Notificar Rejeição" camunda:class="com.exemplo.camundademo.delegate.NotificarRejeicaoDelegate" />
-    <bpmn:serviceTask id="Activity_7" name="Gerar Conta" camunda:class="com.exemplo.camundademo.delegate.GerarContaDelegate" />
-    <bpmn:serviceTask id="Activity_8" name="Enviar Cartão" camunda:class="com.exemplo.camundademo.delegate.EnviarCartaoDelegate" />
+    <bpmn:serviceTask id="Activity_6" name="Notificar Rejeição" camunda:delegateExpression="${notificarRejeicaoDelegate}" />
+    <bpmn:serviceTask id="Activity_7" name="Gerar Conta" camunda:delegateExpression="${gerarContaDelegate}" />
+    <bpmn:serviceTask id="Activity_8" name="Enviar Cartão" camunda:delegateExpression="${enviarCartaoDelegate}" />
     <bpmn:endEvent id="EndEvent_1" name="Fim" />
     <bpmn:sequenceFlow id="Flow_1" sourceRef="StartEvent_1" targetRef="Activity_1" />
     <bpmn:sequenceFlow id="Flow_2" sourceRef="Activity_1" targetRef="Activity_2" />
@@ -76,6 +70,7 @@
       <bpmn:conditionExpression xsi:type="bpmn:tFormalExpression">${classificacaoIdade == "Adulto"}</bpmn:conditionExpression>
     </bpmn:sequenceFlow>
     <bpmn:sequenceFlow id="Flow_Age_Nao" sourceRef="Gateway_Age" targetRef="Activity_NotificarIdade" />
+    <bpmn:sequenceFlow id="Flow_Validacao_Notificar" sourceRef="Boundary_Validacao" targetRef="Activity_6" />
     <bpmn:sequenceFlow id="Flow_Age_Notificar" sourceRef="Activity_NotificarIdade" targetRef="EndEvent_1" />
     <bpmn:sequenceFlow id="Flow_Score_Calc" sourceRef="Activity_CalcularScore" targetRef="Gateway_Score" />
     <bpmn:sequenceFlow id="Flow_Score_Aprovado" sourceRef="Gateway_Score" targetRef="Activity_7">
@@ -113,6 +108,9 @@
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_2_di" bpmnElement="Activity_2">
         <dc:Bounds x="290" y="280" width="100" height="80" />
+      </bpmndi:BPMNShape>
+      <bpmndi:BPMNShape id="Boundary_Validacao_di" bpmnElement="Boundary_Validacao" isMarkerVisible="true">
+        <dc:Bounds x="365" y="360" width="36" height="36" />
       </bpmndi:BPMNShape>
       <bpmndi:BPMNShape id="Activity_ClassificarIdade_di" bpmnElement="Activity_ClassificarIdade">
         <dc:Bounds x="450" y="280" width="100" height="80" />
@@ -194,6 +192,11 @@
         <di:waypoint x="1250" y="470" />
         <di:waypoint x="1550" y="470" />
         <di:waypoint x="1550" y="338" />
+      </bpmndi:BPMNEdge>
+      <bpmndi:BPMNEdge id="Flow_Validacao_Notificar_di" bpmnElement="Flow_Validacao_Notificar">
+        <di:waypoint x="383" y="378" />
+        <di:waypoint x="383" y="580" />
+        <di:waypoint x="1290" y="580" />
       </bpmndi:BPMNEdge>
       <bpmndi:BPMNEdge id="Flow_Score_Calc_di" bpmnElement="Flow_Score_Calc">
         <di:waypoint x="840" y="320" />

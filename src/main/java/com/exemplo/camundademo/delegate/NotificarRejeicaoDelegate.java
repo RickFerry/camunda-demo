@@ -31,12 +31,7 @@ public class NotificarRejeicaoDelegate implements JavaDelegate {
             motivo.append("Score insuficiente (").append(score.intValue()).append("). ");
         }
         if (!aprovado) {
-            String motivoAnalise = (String) execution.getVariable(MOTIVO_REJEICAO);
-            if (motivoAnalise != null && !motivoAnalise.isBlank()) {
-                motivo.append(motivoAnalise);
-            } else {
-                motivo.append("Reprovado na análise manual.");
-            }
+            motivo.append("Reprovado na análise manual.");
         }
 
         String motivoFinal = motivo.toString().trim();

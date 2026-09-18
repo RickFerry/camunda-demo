@@ -5,6 +5,8 @@ import org.camunda.bpm.engine.delegate.DelegateExecution;
 import org.camunda.bpm.engine.delegate.JavaDelegate;
 import org.springframework.stereotype.Component;
 
+import java.util.Map;
+
 @Slf4j
 @Component
 public class ProcessarClassificacaoIdadeDelegate implements JavaDelegate {
@@ -13,8 +15,15 @@ public class ProcessarClassificacaoIdadeDelegate implements JavaDelegate {
 
     @Override
     public void execute(DelegateExecution execution) {
-        String classificacao = (String) execution.getVariable("classificacaoIdade");
-        Long idade = (Long) execution.getVariable("idade");
+        Object classificacaoObj = execution.getVariable("classificacaoIdade");
+        String classificacao = null;
+        if (classificacaoObj instanceof String) {
+            classificacao = (String) classificacaoObj;
+        } else if (classificacaoObj instanceof Map) {
+            classificacao = (String) ((Map<?, ?>) classificacaoObj).get("classificacao");
+        }
+        Object idadeObj = execution.getVariable("idade");
+        Long idade = idadeObj instanceof Number ? ((Number) idadeObj).longValue() : null;
         String nome = (String) execution.getVariable("nome");
 
         log.info("=== Classificação de Idade ===");
@@ -22,11 +31,12 @@ public class ProcessarClassificacaoIdadeDelegate implements JavaDelegate {
         log.info("Idade: {}", idade);
         log.info("Classificação DMN: {}", classificacao);
 
-        switch (classificacao) {
+        switch (classificacao == null ? "" : classificacao) {
             case "Criança", "Adolescente":
                 log.info("→ Menor de idade: conta não pode ser aberta sozinha");
                 execution.setVariable(MENOR_DE_IDADE, true);
-                execution.setVariable("motivoRejeicao", "Menor de idade (" + classificacao + ")");
+                execution.setVariable(NotificarRejeicaoDelegate.MOTIVO_REJEICAO,
+                        "Menor de idade (" + classificacao + ")");
                 break;
             case "Adulto":
                 log.info("→ Maior de idade: prosseguindo com verificação de score");

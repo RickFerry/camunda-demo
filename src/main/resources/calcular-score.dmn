@@ -60,7 +60,7 @@
           <text><![CDATA[[18..59]]]></text>
         </inputEntry>
         <inputEntry id="inputEntry8">
-          <text><![CDATA[[2000..5000]]]></text>
+          <text><![CDATA[[2000..5000[]]></text>
         </inputEntry>
         <outputEntry id="outputEntry4">
           <text>550</text>
